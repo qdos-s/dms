@@ -1,0 +1,61 @@
+.fileContainer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px dashed white;
+    border-radius: 30px;
+    color: white;
+    text-decoration: none;
+    flex-direction: row;
+    position: relative;
+    z-index: 1;
+}
+
+.overlay {
+    position: relative;
+    background-color: rgba(0, 0, 0, 0.1);
+    pointer-events: none;
+    user-select: none;
+}
+
+.fileGroup {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.file {
+    text-decoration: none;
+    color: white;
+}
+
+.file:hover {
+    text-decoration: underline;
+    opacity: 0.5;
+    cursor: pointer;
+}
+
+.buttonsContainer {
+    width: 30%;
+    padding: 20px;
+    display: flex;
+    justify-content: end;
+    gap: 10px;
+}
+
+.link {
+    text-decoration: none;
+    width: 50px;
+    height: 50px;
+    cursor: pointer;
+}
+
+.link:hover, .link:visited, .link.active {
+    color: white;
+}
+
+.link:hover {
+    opacity: 0.7
+}

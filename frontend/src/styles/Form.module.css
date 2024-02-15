@@ -1,0 +1,60 @@
+.form {
+    opacity: 1.5;
+    border-radius: 20px;
+    color: white;
+    font-family: "Roboto Light", monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 400px;
+    gap: 10px;
+    justify-content: space-between;
+    padding: 50px;
+    height: 230px;
+    background-image: url("https://e1.pxfuel.com/desktop-wallpaper/581/154/desktop-wallpaper-backgrounds-for-login-page-login-page.jpg");
+}
+
+.formContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.formGroup {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.input {
+    width: 97%;
+}
+
+.controlButtons {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    gap: 20px;
+}
+
+.button {
+    font-family: inherit;
+    font-size: 20px;
+    color: white;
+    width: 150px;
+    line-height: 30px;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: cornflowerblue;
+}
+
+.button:hover {
+    opacity: 0.9;
+}
+
+.select {
+    width: 100px;
+    justify-self: center;
+}

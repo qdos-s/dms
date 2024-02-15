@@ -1,0 +1,65 @@
+.button {
+    width: 200px;
+    height: 50px;
+    font-family: inherit;
+    font-size: 16px;
+    color: white;
+    line-height: 30px;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: cornflowerblue;
+    border: 1px solid darkblue;
+    box-sizing: border-box;
+}
+
+.button:hover {
+    opacity: 0.9;
+}
+
+.upload {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.input-file {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border: 1px solid blue;
+    border-radius: 10px;
+}
+
+.input-file span {
+    min-width: 200px;
+    height: 50px;
+    font-family: inherit;
+    font-size: 16px;
+    line-height: 30px;
+    border-radius: 10px;
+    cursor: pointer;
+    background-color: white;
+    color: cornflowerblue;
+    position: relative;
+    display: inline-block;
+    text-align: center;
+    box-sizing: border-box;
+    border: 1px white;
+    margin: 0;
+    transition: background-color 0.2s;
+    padding: 10px;
+}
+.input-file input[type=file] {
+    position: absolute;
+    z-index: -1;
+    opacity: 0;
+    display: block;
+    width: 0;
+    height: 0;
+}
+
+.input-file:hover span {
+    opacity: 0.9;
+}

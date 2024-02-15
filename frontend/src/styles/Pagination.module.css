@@ -1,0 +1,27 @@
+.paginationContainer {
+    display: flex;
+    gap: 5px;
+}
+
+.button {
+    width: 50px;
+    height: 30px;
+    border: 2px dashed white;
+    border-radius: 30px;
+    background-color: white;
+    color: cornflowerblue;
+    cursor: pointer;
+    font-size: 20px;
+}
+
+.input {
+    width: 50px;
+    height: 30px;
+    border: 1px dashed white;
+    border-radius: 30px;
+    background-color: white;
+    color: cornflowerblue;
+    text-align: center;
+    box-sizing: border-box;
+    font-size: 20px;
+}

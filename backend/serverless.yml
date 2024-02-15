@@ -1,0 +1,141 @@
+service: dms
+frameworkVersion: '3'
+
+plugins:
+  - serverless-localstack
+
+resources:
+  Resources:
+    UsersTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: users
+        AttributeDefinitions:
+          - AttributeName: username
+            AttributeType: S
+          - AttributeName: password
+            AttributeType: S
+          - AttributeName: role
+            AttributeType: S
+        KeySchema:
+          - AttributeName: username
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: role
+            KeySchema:
+              - AttributeName: password
+                KeyType: HASH
+              - AttributeName: role
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+    DocumentsTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: documents
+        AttributeDefinitions:
+          - AttributeName: fileId
+            AttributeType: S
+          - AttributeName: name
+            AttributeType: S
+          - AttributeName: createdBy
+            AttributeType: S
+        KeySchema:
+          - AttributeName: fileId
+            KeyType: HASH
+        GlobalSecondaryIndexes:
+          - IndexName: nameAndCreatedAt
+            KeySchema:
+              - AttributeName: name
+                KeyType: HASH
+              - AttributeName: createdBy
+                KeyType: RANGE
+            Projection:
+              ProjectionType: ALL
+        BillingMode: PAY_PER_REQUEST
+    MyBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: documents
+        CorsConfiguration:
+          CorsRules:
+            - AllowedMethods:
+                - GET
+                - HEAD
+                - POST
+              AllowedOrigins:
+                - "*"
+              AllowedHeaders:
+                - "*"
+
+custom:
+  localstack:
+    stages:
+      - local
+    host: http://localhost
+    edgePort: 4566
+    autostart: true
+    networks:
+      - host
+      - overlay
+      - my_custom_network
+    lambda:
+      mountCode: True
+    docker:
+      sudo: False
+    endpoints:
+      DynamoDB: http://localhost:4566
+      S3: http://localhost:4566
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  lambdaHashingVersion: 20201221
+  apiGateway:
+    binaryMediaTypes:
+      - 'multipart/form-data'
+
+functions:
+  getUser:
+    handler: lambdas/getUser.getUser
+    events:
+      - http:
+          path: getUser
+          method: post
+          cors: false
+  getDocuments:
+    handler: lambdas/getDocuments.getDocuments
+    events:
+      - http:
+          path: getDocuments
+          method: post
+          cors: false
+  uploadFile:
+    handler: lambdas/uploadFile.uploadFile
+    events:
+      - http:
+          path: uploadFile
+          method: post
+          cors: false
+  createUser:
+    handler: lambdas/createUser.createUser
+    events:
+      - http:
+          path: createUser
+          method: post
+          cors: false
+  deleteDocument:
+    handler: lambdas/deleteDocument.deleteDocument
+    events:
+      - http:
+          path: deleteDocument
+          method: post
+          cors: false
+  changeFileName:
+    handler: lambdas/changeFileName.changeFileName
+    events:
+      - http:
+          path: changeFileName
+          method: post
+          cors: false
