@@ -59,6 +59,9 @@ const uploadFileHandler = async (event) => {
         createdBy: {
           S: username,
         },
+        queryKey: {
+          S: "exist",
+        },
       },
     };
 

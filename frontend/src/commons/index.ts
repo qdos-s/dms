@@ -6,7 +6,6 @@ export const override: CSSProperties = {
 };
 
 export const sortByOptions = {
-  IDLE: "IDLE",
   ASC: "ASC",
   DESC: "DESC",
 };

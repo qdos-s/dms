@@ -1,57 +1,47 @@
-import { FC, useEffect } from "react";
+import { FC } from "react";
 
-import usePagination from "../hooks/usePagination.ts";
 import styles from "../styles/Pagination.module.css";
-import { FileProps } from "../types";
 
 type PaginationPropTypes = {
-  items: FileProps[];
-  pageLimit: number;
-  setPageItems: (pageData: FileProps[]) => void;
+  handleNextPage: () => void;
+  handlePrevPage: () => void;
+  currentPage: number;
+  isNextRecord: boolean;
 };
 
 const Pagination: FC<PaginationPropTypes> = ({
-  items,
-  pageLimit,
-  setPageItems,
+  handleNextPage,
+  handlePrevPage,
+  currentPage,
+  isNextRecord,
 }) => {
-  const {
-    pageNumber,
-    pageCount,
-    changePage,
-    pageData,
-    previousPage,
-    nextPage,
-  } = usePagination(items, pageLimit);
-
-  useEffect(() => {
-    setPageItems(pageData());
-  }, [pageNumber, items]);
-
   return (
     <div className={styles.paginationContainer}>
       <button
-        onClick={previousPage}
+        onClick={handlePrevPage}
         className={styles.button}
-        disabled={pageNumber === 1}
+        disabled={currentPage === 1}
       >
         &#8592;
       </button>
       <input
-        value={pageNumber}
+        value={currentPage}
         onChange={(e) => {
-          changePage(e.target.valueAsNumber);
+          if (currentPage < e.target.valueAsNumber) {
+            handleNextPage();
+          } else {
+            handlePrevPage();
+          }
         }}
         type="number"
         min={1}
-        max={pageCount}
         className={styles.input}
         onKeyDown={(e) => e.preventDefault()}
       />
       <button
         className={styles.button}
-        onClick={nextPage}
-        disabled={pageNumber === pageCount}
+        onClick={handleNextPage}
+        disabled={!isNextRecord}
       >
         &#8594;
       </button>

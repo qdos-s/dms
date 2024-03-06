@@ -1,4 +1,4 @@
-import { ChangeEvent, FC, useState } from "react";
+import { ChangeEvent, FC } from "react";
 import { BeatLoader } from "react-spinners";
 
 import noFilesIcon from "../assets/noFilesIcon.png";
@@ -29,6 +29,10 @@ type FilesPropTypes = {
   onSearchChange: (event: ChangeEvent<HTMLInputElement>) => void;
   searchText: string;
   handleSearch: () => void;
+  handleNextPage: () => void;
+  handlePrevPage: () => void;
+  currentPage: number;
+  isNextRecord: boolean;
 };
 
 const Files: FC<FilesPropTypes> = ({
@@ -52,9 +56,11 @@ const Files: FC<FilesPropTypes> = ({
   onSearchChange,
   searchText,
   handleSearch,
+  handlePrevPage,
+  handleNextPage,
+  currentPage,
+  isNextRecord,
 }) => {
-  const [pageFiles, setPageFiles] = useState<FileProps[]>([]);
-
   return (
     <div className={styles.container}>
       <div className={styles.content}>
@@ -66,8 +72,8 @@ const Files: FC<FilesPropTypes> = ({
         />
         {!isFileLoading ? (
           <div className={styles.files}>
-            {!!pageFiles.length &&
-              pageFiles.map((file: FileProps) => {
+            {!!files.length &&
+              files.map((file: FileProps) => {
                 return (
                   <File
                     key={file.fileId}
@@ -88,7 +94,7 @@ const Files: FC<FilesPropTypes> = ({
                   />
                 );
               })}
-            {!pageFiles.length && (
+            {!files.length && (
               <>
                 <div className={styles.content}>
                   <img
@@ -105,7 +111,12 @@ const Files: FC<FilesPropTypes> = ({
           <BeatLoader color="#ffffff" />
         )}
         {isFileUploading && <BeatLoader color="#ffffff" />}
-        <Pagination items={files} pageLimit={5} setPageItems={setPageFiles} />
+        <Pagination
+          handlePrevPage={handlePrevPage}
+          handleNextPage={handleNextPage}
+          currentPage={currentPage}
+          isNextRecord={isNextRecord}
+        />
       </div>
     </div>
   );

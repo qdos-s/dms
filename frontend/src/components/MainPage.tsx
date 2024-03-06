@@ -6,7 +6,6 @@ import styles from "../styles/MainPage.module.css";
 import { ChangeFileNameTypes, FileProps } from "../types";
 import { decodeToken } from "../utils/decodeToken.ts";
 import { setAuthHeader } from "../utils/setAuthHeader.ts";
-import { setFilesBySortOptions } from "../utils/setFilesBySortOptions.ts";
 import Files from "./Files.tsx";
 import Header from "./Header.tsx";
 
@@ -24,42 +23,45 @@ const MainPage: FC<MainPagePropTypes> = ({ onLogout }) => {
   const [fileToDelete, setFileToDelete] = useState<FileProps | null>(null);
   const [isFileLoading, setIsFileLoading] = useState<boolean>(false);
   const [isFileUploading, setIsFileUploading] = useState<boolean>(false);
-  const [isSearching, setIsSearching] = useState<boolean>(false);
   const [showModal, setShowModal] = useState<boolean>(false);
-  const [sortBy, setSortBy] = useState<keyof typeof sortByOptions>("IDLE");
+  const [sortBy, setSortBy] = useState<keyof typeof sortByOptions>("ASC");
   const [counter, setCounter] = useState<number>(0);
   const [searchText, setSearchText] = useState<string>("");
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [lastEvaluatedKey, setLastEvaluatedKey] = useState<object>({});
+  const [isNextRecord, setIsNextRecord] = useState<boolean>(false);
+  const [scanIndex, setScanIndex] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchDocuments = async () => {
       setIsFileLoading(true);
       const response = await fetch(
-        "http://localhost:4566/restapis/gfpzkgjitd/local/_user_request_/getDocuments",
+        `http://localhost:4566/restapis/8kpvlotq3a/local/_user_request_/getDocuments?pageSize=5&sortBy=${sortBy}&searchText=${searchText}&scanIndex=${scanIndex}`,
         {
           method: "POST",
           headers: {
+            "Content-Type": "application/json",
             Authorization: setAuthHeader(),
           },
+          body: JSON.stringify({
+            lastEvaluatedKey,
+          }),
         },
       );
       const res = await response.json();
       if (res.documents.length) {
-        const filteredFiles = isSearching
-          ? res.documents.filter((doc: FileProps) =>
-              doc.name.includes(searchText),
-            )
-          : res.documents;
-        const sortedFiles = setFilesBySortOptions(sortBy, filteredFiles);
-        if (sortedFiles.length === 0) {
-          setFiles(filteredFiles);
-        } else {
-          setFiles(sortedFiles);
-        }
+        setFiles(res.documents);
+        if (res.lastEvaluatedKey) setLastEvaluatedKey(res.lastEvaluatedKey);
+      } else if (currentPage > 1 && !isNextRecord) {
+        setCurrentPage(1);
+      } else {
+        setFiles([]);
       }
+      setIsNextRecord(res.isNextRecord);
       setIsFileLoading(false);
     };
     fetchDocuments();
-  }, [counter]);
+  }, [counter, currentPage, sortBy]);
 
   const activeUser = decodeToken();
   if (!activeUser) {
@@ -80,7 +82,7 @@ const MainPage: FC<MainPagePropTypes> = ({ onLogout }) => {
           formData.append("fileId", fileToUploadVersion.fileId);
         }
         const response = await fetch(
-          "http://localhost:4566/restapis/gfpzkgjitd/local/_user_request_/uploadFile",
+          "http://localhost:4566/restapis/8kpvlotq3a/local/_user_request_/uploadFile",
           {
             method: "POST",
             body: formData,
@@ -92,15 +94,10 @@ const MainPage: FC<MainPagePropTypes> = ({ onLogout }) => {
           toast.success(`${file?.name} uploaded successfully!`, {
             position: toast.POSITION.TOP_CENTER,
           });
-          if (!fileToUploadVersion) {
-            const updatedFiles = [...files, result.file];
-            const sortedFiles = setFilesBySortOptions(sortBy, updatedFiles);
-            if (sortedFiles.length > 1) {
-              setFiles(sortedFiles);
-            } else {
-              setCounter((prevState) => ++prevState);
-            }
-          }
+          setScanIndex(sortBy !== "DESC");
+          setLastEvaluatedKey({});
+          setCurrentPage(1);
+          setCounter((prevState) => ++prevState);
         } else {
           toast.error(result.err, {
             position: toast.POSITION.TOP_CENTER,
@@ -131,7 +128,7 @@ const MainPage: FC<MainPagePropTypes> = ({ onLogout }) => {
   const changeFileName = async (body: ChangeFileNameTypes) => {
     try {
       const response = await fetch(
-        "http://localhost:4566/restapis/gfpzkgjitd/local/_user_request_/changeFileName",
+        "http://localhost:4566/restapis/8kpvlotq3a/local/_user_request_/changeFileName",
         {
           method: "POST",
           headers: {
@@ -154,23 +151,10 @@ const MainPage: FC<MainPagePropTypes> = ({ onLogout }) => {
           },
         );
         if (fileToUpdateFileName) {
-          const updatedFiles = [
-            ...files.map((file) => {
-              if (file.fileId === body.fileId) {
-                return {
-                  ...file,
-                  name: body.newFileName,
-                };
-              }
-              return file;
-            }),
-          ];
-          const sortedFiles = setFilesBySortOptions(sortBy, updatedFiles);
-          if (sortedFiles.length > 1) {
-            setFiles(sortedFiles);
-          } else {
-            setCounter((prevState) => ++prevState);
-          }
+          setScanIndex(sortBy !== "DESC");
+          setLastEvaluatedKey({});
+          setCurrentPage(1);
+          setCounter((prevState) => ++prevState);
         }
       } else {
         toast.error(result.err, {
@@ -196,7 +180,7 @@ const MainPage: FC<MainPagePropTypes> = ({ onLogout }) => {
     try {
       setFileToDelete(file);
       const response = await fetch(
-        "http://localhost:4566/restapis/gfpzkgjitd/local/_user_request_/deleteDocument",
+        "http://localhost:4566/restapis/8kpvlotq3a/local/_user_request_/deleteDocument",
         {
           method: "POST",
           headers: {
@@ -215,9 +199,10 @@ const MainPage: FC<MainPagePropTypes> = ({ onLogout }) => {
           position: toast.POSITION.TOP_CENTER,
         });
         setFileToDelete(null);
-        setFiles(() => [
-          ...files.filter((fl: FileProps) => fl.fileId !== file.fileId),
-        ]);
+        setScanIndex(sortBy !== "DESC");
+        setLastEvaluatedKey({});
+        setCurrentPage(1);
+        setCounter((prevState) => ++prevState);
       } else {
         toast.error(res.err, {
           position: toast.POSITION.TOP_CENTER,
@@ -264,14 +249,10 @@ const MainPage: FC<MainPagePropTypes> = ({ onLogout }) => {
 
   const handleOnSelectChange = (e: ChangeEvent<HTMLSelectElement>) => {
     const sortBy = e.target.value as keyof typeof sortByOptions;
+    setScanIndex(sortBy !== "DESC");
+    setLastEvaluatedKey({});
     setSortBy(sortBy);
-    const copiedFiles = [...files];
-    const sortedFiles = setFilesBySortOptions(sortBy, copiedFiles);
-    if (sortedFiles.length > 1) {
-      setFiles(sortedFiles);
-    } else {
-      setCounter((prevState) => ++prevState);
-    }
+    setCurrentPage(1);
   };
 
   const onSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -279,12 +260,33 @@ const MainPage: FC<MainPagePropTypes> = ({ onLogout }) => {
   };
 
   const handleSearch = () => {
-    if (!searchText.trim()) {
-      setIsSearching(false);
-      setCounter((prevState) => ++prevState);
-    } else {
-      setIsSearching(true);
-      setCounter((prevState) => ++prevState);
+    setScanIndex(sortBy !== "DESC");
+    setLastEvaluatedKey({});
+    setCurrentPage(1);
+    setCounter((prevState) => ++prevState);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) {
+      setScanIndex(sortBy === "DESC");
+      setLastEvaluatedKey({
+        fileId: { S: files[0].fileId },
+        name: { S: files[0].name },
+        queryKey: { S: files[0].queryKey },
+      });
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (isNextRecord) {
+      setScanIndex(sortBy !== "DESC");
+      setLastEvaluatedKey({
+        fileId: { S: files[4].fileId },
+        name: { S: files[4].name },
+        queryKey: { S: files[4].queryKey },
+      });
+      setCurrentPage(currentPage + 1);
     }
   };
 
@@ -312,6 +314,10 @@ const MainPage: FC<MainPagePropTypes> = ({ onLogout }) => {
         onSearchChange={onSearchChange}
         handleSearch={handleSearch}
         searchText={searchText}
+        handlePrevPage={handlePrevPage}
+        handleNextPage={handleNextPage}
+        currentPage={currentPage}
+        isNextRecord={isNextRecord}
       />
       {activeUser!.role === "admin" && (
         <div className={styles.upload}>

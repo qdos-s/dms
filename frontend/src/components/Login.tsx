@@ -21,7 +21,7 @@ const Login: FC<LoginPropTypes> = ({ onLogin }) => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "http://localhost:4566/restapis/gfpzkgjitd/local/_user_request_/getUser",
+        "http://localhost:4566/restapis/8kpvlotq3a/local/_user_request_/getUser",
         {
           method: "POST",
           headers: {

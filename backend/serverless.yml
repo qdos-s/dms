@@ -39,17 +39,23 @@ resources:
             AttributeType: S
           - AttributeName: name
             AttributeType: S
-          - AttributeName: createdBy
+          - AttributeName: queryKey
             AttributeType: S
         KeySchema:
           - AttributeName: fileId
             KeyType: HASH
         GlobalSecondaryIndexes:
-          - IndexName: nameAndCreatedAt
+          - IndexName: queryKey
             KeySchema:
-              - AttributeName: name
+                - AttributeName: queryKey
+                  KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: nameAndQueryKey
+            KeySchema:
+              - AttributeName: queryKey
                 KeyType: HASH
-              - AttributeName: createdBy
+              - AttributeName: name
                 KeyType: RANGE
             Projection:
               ProjectionType: ALL

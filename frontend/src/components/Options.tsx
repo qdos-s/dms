@@ -20,7 +20,6 @@ const Options: FC<OptionsPropTypes> = ({
       <div className={styles.option}>
         <div className={styles.sorting}>Sorting: </div>
         <select className={styles.select} onChange={handleOnSelectChange}>
-          <option>IDLE</option>
           <option>ASC</option>
           <option>DESC</option>
         </select>

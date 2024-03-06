@@ -2,6 +2,7 @@ export type FileProps = {
   fileId: string;
   name: string;
   createdBy: string;
+  queryKey: string;
 };
 
 export type ChangeFileNameTypes = {
